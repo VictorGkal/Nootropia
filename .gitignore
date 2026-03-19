@@ -1,0 +1,9 @@
+# Backend
+nootropia-backend/.venv
+nootropia-backend/__pycache__
+nootropia-backend/**/__pycache__
+nootropia-backend/.env
+
+# General
+.DS_Store
+*.pyc
