@@ -39,12 +39,23 @@ function PublicationCard({
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col gap-3 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-      {/* Topic badge */}
-      {publication.topic && (
-        <span className="text-xs bg-purple-700/50 text-purple-300 px-3 py-1 rounded-full w-fit">
-          {publication.topic}
-        </span>
-      )}
+      {/* Topic badges */}
+      <div className="flex flex-wrap gap-2">
+        {publication.topics && publication.topics.length > 0 ? (
+          publication.topics.map((topic) => (
+            <span
+              key={topic}
+              className="text-xs bg-purple-700/50 text-purple-300 px-3 py-1 rounded-full"
+            >
+              {topic}
+            </span>
+          ))
+        ) : publication.topic ? (
+          <span className="text-xs bg-purple-700/50 text-purple-300 px-3 py-1 rounded-full">
+            {publication.topic}
+          </span>
+        ) : null}
+      </div>
 
       {/* Title */}
       <h2 className="text-white font-semibold text-lg leading-snug">
@@ -68,10 +79,11 @@ function PublicationCard({
         )}
       </div>
 
-      {/* Abstract */}
       {publication.abstract && (
-        <p className="text-gray-400 text-sm leading-relaxed line-clamp-3">
-          {publication.abstract}
+        <p className="text-gray-400 text-sm leading-relaxed">
+          {publication.abstract.length > 400
+            ? publication.abstract.slice(0, 400) + "..."
+            : publication.abstract}
         </p>
       )}
 

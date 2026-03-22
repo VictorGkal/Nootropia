@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -37,9 +37,16 @@ class PublicationResponse(BaseModel):
     year: Optional[int]
     citations: Optional[int]
     topic: Optional[str]
+    topics: list[str] = []
     abstract: Optional[str]
     url: Optional[str]
     fetched_at: datetime
+
+    @field_validator("topics", mode="before")
+    def extract_topics(cls, v):
+        if v and isinstance(v[0], object) and hasattr(v[0], "topic"):
+            return [t.topic for t in v]
+        return v
 
     class Config:
         from_attributes = True

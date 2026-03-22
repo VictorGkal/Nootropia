@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { addPreference } from "../services/api";
+import { addPreference, getPreferences } from "../services/api";
 import PageBackground from "../components/PageBackground.jsx";
 import CentralBox from "../components/CentralBox.jsx";
 import Button1 from "../components/Button1.jsx";
@@ -49,6 +49,14 @@ function TopicsPage() {
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      getPreferences().then((res) => {
+        setSelectedTopics(res.data.map((p) => p.topic));
+      });
+    }
+  }, [user]);
 
   const filteredTopics = HOT_TOPICS.filter(
     (topic) =>

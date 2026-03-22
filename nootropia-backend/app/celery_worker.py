@@ -1,6 +1,5 @@
 from celery import Celery
 from celery.schedules import crontab
-from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
 from pyalex import Works
@@ -35,8 +34,44 @@ TOPICS = [
     "database systems",
     "cloud computing",
     "internet of things",
-    "blockchain"
+    "blockchain",
+    "deep learning",
+    "natural language processing",
+    "computer vision",
+    "robotics",
+    "quantum computing",
+    "augmented reality",
+    "virtual reality",
+    "big data",
+    "edge computing",
+    "5g networks",
+    "bioinformatics",
+    "cryptography",
+    "distributed systems",
+    "operating systems",
+    "computer architecture",
+    "web development",
+    "mobile development",
+    "devops",
+    "microservices",
+    "api design",
 ]
+
+def reconstruct_abstract(inverted_index):
+    """Reconstruct abstract from OpenAlex inverted index format"""
+    if not inverted_index:
+        return None
+    try:
+        words = {}
+        for word, positions in inverted_index.items():
+            for pos in positions:
+                words[pos] = word
+        if not words:
+            return None
+        return " ".join(words[i] for i in sorted(words.keys()))
+    except Exception:
+        return None
+
 
 @celery_app.task
 def fetch_and_store_publications():
@@ -59,6 +94,14 @@ def fetch_and_store_publications():
 
                     if existing:
                         existing.citations = work.get("cited_by_count", 0)
+                        # add topic if not already there
+                        existing_topics = [t.topic for t in existing.topics]
+                        if topic not in existing_topics:
+                            new_topic = models.PublicationTopic(
+                                publication_id=existing.id,
+                                topic=topic
+                            )
+                            db.add(new_topic)
                         db.commit()
                         continue
 
@@ -68,7 +111,9 @@ def fetch_and_store_publications():
                         if a.get("author") and a["author"].get("display_name")
                     ])
 
-                    abstract = work.get("abstract", "") or ""
+                    abstract = reconstruct_abstract(
+                        work.get("abstract_inverted_index")
+                    )
 
                     new_publication = models.Publication(
                         openalex_id=work["id"],
@@ -77,10 +122,18 @@ def fetch_and_store_publications():
                         year=work.get("publication_year"),
                         citations=work.get("cited_by_count", 0),
                         topic=topic,
-                        abstract=abstract[:500] if abstract else None,
+                        abstract=abstract[:1000] if abstract else None,
                         url=work.get("primary_location", {}).get("landing_page_url") if work.get("primary_location") else None
                     )
                     db.add(new_publication)
+                    db.flush()
+
+                    # save topic to publication_topics
+                    new_pub_topic = models.PublicationTopic(
+                        publication_id=new_publication.id,
+                        topic=topic
+                    )
+                    db.add(new_pub_topic)
                     db.commit()
                     db.refresh(new_publication)
                     print(f"Saved: {work.get('title', 'No title')[:50]}")
@@ -124,7 +177,10 @@ def fetch_publications_for_topic(topic: str):
                     if a.get("author") and a["author"].get("display_name")
                 ])
 
-                abstract = work.get("abstract", "") or ""
+                # reconstruct abstract from inverted index
+                abstract = reconstruct_abstract(
+                    work.get("abstract_inverted_index")
+                )
 
                 new_publication = models.Publication(
                     openalex_id=work["id"],

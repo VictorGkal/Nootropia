@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/api";
+import { login, getMe } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LabelInput from "../components/LabelInput";
 import Button1 from "../components/Button1";
@@ -22,7 +22,16 @@ function LoginPage() {
     try {
       setLoading(true);
       const res = await login(email, password);
-      loginUser(res.data.access_token, res.data);
+
+      // save token to localStorage first so getMe can use it
+      localStorage.setItem("token", res.data.access_token);
+
+      // now fetch actual user data
+      const userRes = await getMe();
+
+      // save both token and user data
+      loginUser(res.data.access_token, userRes.data);
+
       navigate("/feed");
     } catch (err) {
       setError(err.response?.data?.detail || null);

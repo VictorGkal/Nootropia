@@ -41,15 +41,20 @@ def get_recent_publications(
     query = db.query(models.Publication).order_by(
         models.Publication.year.desc()
     )
+
     if current_user:
         user_topics = [p.topic for p in current_user.preferences]
         if user_topics:
-            query = query.filter(models.Publication.topic.in_(user_topics))
+            query = query.join(models.PublicationTopic).filter(
+                models.PublicationTopic.topic.in_(user_topics)
+            )
     elif topics:
         topic_list = topics.split(",")
-        query = query.filter(models.Publication.topic.in_(topic_list))
+        query = query.join(models.PublicationTopic).filter(
+            models.PublicationTopic.topic.in_(topic_list)
+        )
 
-    return query.offset(skip).limit(limit).all()
+    return query.distinct().offset(skip).limit(limit).all()
 
 
 @router.get("/popular", response_model=list[schemas.PublicationResponse])
@@ -63,16 +68,20 @@ def get_popular_publications(
     query = db.query(models.Publication).order_by(
         models.Publication.citations.desc()
     )
+
     if current_user:
         user_topics = [p.topic for p in current_user.preferences]
         if user_topics:
-            query = query.filter(models.Publication.topic.in_(user_topics))
+            query = query.join(models.PublicationTopic).filter(
+                models.PublicationTopic.topic.in_(user_topics)
+            )
     elif topics:
         topic_list = topics.split(",")
-        query = query.filter(models.Publication.topic.in_(topic_list))
+        query = query.join(models.PublicationTopic).filter(
+            models.PublicationTopic.topic.in_(topic_list)
+        )
 
-    return query.offset(skip).limit(limit).all()
-
+    return query.distinct().offset(skip).limit(limit).all()
 
 @router.get("/random", response_model=list[schemas.PublicationResponse])
 def get_random_publications(

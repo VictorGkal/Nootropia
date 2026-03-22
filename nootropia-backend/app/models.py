@@ -26,6 +26,16 @@ class Preference(Base):
     user = relationship("User", back_populates="preferences")
 
 
+class PublicationTopic(Base):
+    __tablename__ = "publication_topics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    publication_id = Column(Integer, ForeignKey("publications.id"))
+    topic = Column(String, nullable=False, index=True)
+
+    publication = relationship("Publication", back_populates="topics")
+
+
 class Publication(Base):
     __tablename__ = "publications"
 
@@ -40,6 +50,7 @@ class Publication(Base):
     url = Column(String)
     fetched_at = Column(DateTime, default=datetime.utcnow)
 
+    topics = relationship("PublicationTopic", back_populates="publication")
     bookmarks = relationship("Bookmark", back_populates="publication")
 
 

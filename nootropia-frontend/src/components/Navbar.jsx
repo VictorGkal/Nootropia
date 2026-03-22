@@ -43,7 +43,8 @@ function Navbar({ onSearch }) {
       <div className="flex flex-row items-center gap-4 whitespace-nowrap">
         {user ? (
           <>
-            <span className="text-gray-300 text-sm">👤 {user.email}</span>
+            <span className="text-gray-300 text-sm">{user.email}</span>
+            <span className="text-gray-300"> | </span>
             <button
               className="text-red-400 hover:text-red-600 text-sm transition duration-200"
               onClick={handleLogout}
@@ -59,6 +60,7 @@ function Navbar({ onSearch }) {
             >
               Log in
             </button>
+            <span className="text-gray-300"> | </span>
             <button
               className="text-blue-500 hover:text-blue-700 text-sm transition duration-200"
               onClick={() => navigate("/register")}
