@@ -7,15 +7,16 @@ function Button1({
   className,
   disabled,
   type = "button",
+  onClick,
 }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (navigation) {
+    if (onClick) {
+      onClick();
+    } else if (navigation) {
       navigate(navigation);
     }
-    // if no navigation → do nothing
-    // let the form handle the submit
   };
 
   return (
@@ -24,7 +25,7 @@ function Button1({
       onClick={type === "submit" ? undefined : handleClick}
       disabled={disabled}
       className={twMerge(
-        "p-[15px] rounded-lg text-xl font-semibold hover:text-gray-200 bg-purple-700 border-purple-800 hover:bg-purple-900 text-white shadow-xl disabled:opacity-50 disabled:cursor-not-allowed",
+        "font-mono p-[15px] rounded-lg text-xl font-semibold text-purple-400 border-2 border-purple-400 hover:bg-purple-400 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed",
         className,
       )}
     >

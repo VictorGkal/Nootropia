@@ -23,7 +23,7 @@ function LoginPage() {
       setLoading(true);
       const res = await login(email, password);
       loginUser(res.data.access_token, res.data);
-      navigate("/topics");
+      navigate("/feed");
     } catch (err) {
       setError(err.response?.data?.detail || null);
     } finally {

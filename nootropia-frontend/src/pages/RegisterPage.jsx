@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../services/api";
+import { register, login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LabelInput from "../components/LabelInput";
 import Button1 from "../components/Button1";
@@ -20,7 +20,6 @@ function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    // validation
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
       return;
@@ -28,8 +27,13 @@ function RegisterPage() {
 
     try {
       setLoading(true);
-      const res = await register(email, password);
-      loginUser(res.data.access_token, res.data);
+      // Step 1 — register
+      await register(email, password);
+
+      // Step 2 — login to get token
+      const loginRes = await login(email, password);
+      loginUser(loginRes.data.access_token, loginRes.data);
+
       navigate("/topics");
     } catch (err) {
       setError(err.response?.data?.detail || null);
