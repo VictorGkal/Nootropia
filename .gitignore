@@ -3,6 +3,7 @@ nootropia-backend/.venv
 nootropia-backend/__pycache__
 nootropia-backend/**/__pycache__
 nootropia-backend/.env
+nootropia-backend/docker-compose.yml
 
 # General
 .DS_Store

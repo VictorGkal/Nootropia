@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
 
+# class to create users table in db
 class User(Base):
     __tablename__ = "users"
 
@@ -15,7 +16,7 @@ class User(Base):
     preferences = relationship("Preference", back_populates="user")
     bookmarks = relationship("Bookmark", back_populates="user")
 
-
+# class to create topics for users (table) in db
 class Preference(Base):
     __tablename__ = "preferences"
 
@@ -25,7 +26,7 @@ class Preference(Base):
 
     user = relationship("User", back_populates="preferences")
 
-
+# class to create topics for publications (table) in db
 class PublicationTopic(Base):
     __tablename__ = "publication_topics"
 
@@ -35,7 +36,7 @@ class PublicationTopic(Base):
 
     publication = relationship("Publication", back_populates="topics")
 
-
+# class to create publications table in db
 class Publication(Base):
     __tablename__ = "publications"
 
@@ -53,7 +54,7 @@ class Publication(Base):
     topics = relationship("PublicationTopic", back_populates="publication")
     bookmarks = relationship("Bookmark", back_populates="publication")
 
-
+# class to create bookmarks table in db
 class Bookmark(Base):
     __tablename__ = "bookmarks"
 
