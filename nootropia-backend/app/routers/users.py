@@ -11,8 +11,10 @@ from app.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 
+# mini router that groups related endpoints together
 router = APIRouter()
 
+# post endpoint for user register  
 @router.post("/register", response_model=schemas.UserResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(
@@ -30,7 +32,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-
+# post endpoint for user login 
 @router.post("/login", response_model=schemas.Token)
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(
@@ -47,12 +49,12 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-
+# get endpoint for current user
 @router.get("/me", response_model=schemas.UserResponse)
 def get_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
-
+# post endpoint for preferences of the current user
 @router.post("/preferences", response_model=schemas.PreferenceResponse)
 def add_preference(
     preference: schemas.PreferenceCreate,
@@ -77,7 +79,7 @@ def add_preference(
     db.refresh(new_preference)
     return new_preference
 
-
+# get endpoint for topics of the current user 
 @router.get("/preferences", response_model=list[schemas.PreferenceResponse])
 def get_preferences(
     current_user: models.User = Depends(get_current_user),
@@ -87,7 +89,7 @@ def get_preferences(
         models.Preference.user_id == current_user.id
     ).all()
 
-
+# delete endpoint for topic of the current user
 @router.delete("/preferences/{topic}")
 def delete_preference(
     topic: str,

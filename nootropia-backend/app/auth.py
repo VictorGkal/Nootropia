@@ -24,6 +24,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds
 # expect token in the login endpoint
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
+# for optional auth (guest) returns none if no token
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
+
 # encrpyt password
 def hash_password(password):
     return pwd_context.hash(password)
@@ -87,3 +90,20 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+# get user if there is a token or get a guest if there is none
+def get_optional_user(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db)
+):
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
+        email = payload.get("sub")
+        if email is None:
+            return None
+        user = db.query(models.User).filter(models.User.email == email).first()
+        return user
+    except JWTError:
+        return None
