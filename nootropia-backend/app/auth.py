@@ -16,7 +16,6 @@ load_dotenv()
 # load env variables for jwt settings
 SECRET_KEY = os.getenv("SECRET_KEY") 
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 # for password encryption use bcrypt algorithm, hash 12 times and recognize old hashes
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
@@ -36,8 +35,8 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# data = {"sub": "victor@gmail.com"}
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+# create token function either for access or refresh
+def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     
      # copy data so we dont modify the original
     to_encode = data.copy()
@@ -59,19 +58,15 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     
     return encoded_jwt
 
-# get user based on jwt token
-def get_current_user(
-    token: str = Depends(oauth2_scheme), # extract token from authorization header
-    db: Session = Depends(get_db) # create a db seasion for later user filtering
-):  
-    # create exception error handling
+# get user from token
+def get_user_from_token(token: str, db: Session):
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # decode jwt token 
+        # decode token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
         # wrap email found in the token into a token object
@@ -79,17 +74,24 @@ def get_current_user(
 
         if token_data.email is None:
             raise credentials_exception
-        
-    except JWTError:    
+    except JWTError:
         raise credentials_exception
     
-    # find user based on email found in the token 
+    # get user based on email
     user = db.query(models.User).filter(
         models.User.email == token_data.email
     ).first()
+
     if user is None:
         raise credentials_exception
     return user
+
+# get user based on jwt token only fastApi can 
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    return get_user_from_token(token, db)
 
 # get user if there is a token or get a guest if there is none
 def get_optional_user(
@@ -99,7 +101,7 @@ def get_optional_user(
     if not token:
         return None
     try:
-        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
         if email is None:
             return None

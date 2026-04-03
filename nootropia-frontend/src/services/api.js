@@ -9,14 +9,42 @@ const api = axios.create({
   },
 });
 
-// automatically add token to every request
+let accessToken = null;
+
+export const setToken = (token) => {
+  accessToken = token;
+};
+export const clearToken = () => {
+  accessToken = null;
+};
+
+// add token from memory
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
+
+// auto refresh on 401
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      try {
+        const res = await refresh();
+        setToken(res.data.access_token);
+        // retry original request
+        error.config.headers.Authorization = `Bearer ${res.data.access_token}`;
+        return api(error.config);
+      } catch {
+        clearToken();
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Auth
 export const register = (email, password) =>
