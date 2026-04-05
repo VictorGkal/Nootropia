@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, login, getMe } from "../services/api";
+import { register, login, getMe, setToken } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LabelInput from "../components/LabelInput";
 import Button1 from "../components/Button1";
@@ -32,9 +32,10 @@ function RegisterPage() {
 
       const loginRes = await login(email, password);
 
-      localStorage.setItem("token", loginRes.data.access_token);
+      setToken(loginRes.data.access_token);
 
       const userRes = await getMe();
+
       loginUser(loginRes.data.access_token, userRes.data);
 
       navigate("/topics");

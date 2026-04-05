@@ -4,6 +4,7 @@ const API_URL = "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,6 +19,8 @@ export const clearToken = () => {
   accessToken = null;
 };
 
+export const refresh = () => api.post("/users/refresh");
+
 // add token from memory
 api.interceptors.request.use((config) => {
   if (accessToken) {
@@ -30,15 +33,19 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const isRefreshCall = error.config?.url === "/users/refresh";
+
+    if (error.response?.status === 401 && !isRefreshCall) {
       try {
         const res = await refresh();
-        setToken(res.data.access_token);
-        // retry original request
-        error.config.headers.Authorization = `Bearer ${res.data.access_token}`;
+        const newAccessToken = res.data.access_token;
+        setToken(newAccessToken);
+
+        error.config.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(error.config);
       } catch {
         clearToken();
+        localStorage.removeItem("hasSession");
         window.location.href = "/login";
       }
     }

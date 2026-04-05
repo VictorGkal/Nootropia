@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, getMe } from "../services/api";
+import { login, getMe, setToken } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LabelInput from "../components/LabelInput";
 import Button1 from "../components/Button1";
@@ -23,10 +23,8 @@ function LoginPage() {
       setLoading(true);
       const res = await login(email, password);
 
-      // save token to localStorage first so getMe can use it
-      localStorage.setItem("token", res.data.access_token);
+      setToken(res.data.access_token);
 
-      // now fetch actual user data
       const userRes = await getMe();
 
       // save both token and user data
