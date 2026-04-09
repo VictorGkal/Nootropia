@@ -1,27 +1,39 @@
 import axios from "axios";
 
+// get backend url
 const API_URL = "http://localhost:8000";
 
+// create an axios client
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+
+  withCredentials: true, // allow to send cookies to backend
+
+  timeout: 5000, // limit request duration time
+
+  // specify that client is sending json to backend
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// access token saved in memory
 let accessToken = null;
 
+// setter for access token
 export const setToken = (token) => {
   accessToken = token;
 };
+
+// resets access token to null
 export const clearToken = () => {
   accessToken = null;
 };
 
+// fetch endpoint for refresh
 export const refresh = () => api.post("/users/refresh");
 
-// add token from memory
+// on request add token to it if there is one
 api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -29,50 +41,59 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// auto refresh on 401
+// on response receive response if no errors else deal with errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => response, // receive respone for no errors
   async (error) => {
-    const isRefreshCall = error.config?.url === "/users/refresh";
-
-    if (error.response?.status === 401 && !isRefreshCall) {
+    // check if error is for token expiry and if the error occurs on refresh
+    if (
+      error.response?.status === 401 &&
+      error.config?.url !== "/users/refresh"
+    ) {
       try {
-        const res = await refresh();
-        const newAccessToken = res.data.access_token;
-        setToken(newAccessToken);
+        const res = await refresh(); // get a dictionary that contains the access token and the token type
+        const newAccessToken = res.data.access_token; // get token from res dictionary
+        setToken(newAccessToken); // set the access token in memory
 
+        // puts the new access token in headers
         error.config.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        // replays the same request with new headers
         return api(error.config);
       } catch {
-        clearToken();
-        localStorage.removeItem("hasSession");
-        window.location.href = "/login";
+        clearToken(); // set access token in memory to null
+        localStorage.removeItem("hasSession"); // mark that session has ended
+        window.location.href = "/login"; // relocate user to login page
       }
     }
+    // if promise fails and there is another error send error back
     return Promise.reject(error);
   },
 );
 
-// Auth
+// endpoint for register
 export const register = (email, password) =>
   api.post("/users/register", { email, password });
 
+// endpoint for login
 export const login = (email, password) =>
   api.post("/users/login", { email, password });
 
+// endpoint for getting the current user
 export const getMe = () => api.get("/users/me");
 
-// Preferences
+// endpoint for getting a user's topics
 export const getPreferences = () => api.get("/users/preferences");
 
+// endpoint for adding topics for a user
 export const addPreference = (topic) =>
   api.post("/users/preferences", { topic });
 
+// endpoint for deleting topics for a user
 export const deletePreference = (topic) =>
   api.delete(`/users/preferences/${topic}`);
 
-// Publications
-
+// endpoint for getting recent publications, limit to 10 per page
 export const getRecentPublications = (limit = 10, skip = 0, topics = []) => {
   const topicsParam = topics.length > 0 ? `&topics=${topics.join(",")}` : "";
   return api.get(
@@ -80,6 +101,7 @@ export const getRecentPublications = (limit = 10, skip = 0, topics = []) => {
   );
 };
 
+// endpoint for getting popular publications, limit to 10 per page
 export const getPopularPublications = (limit = 10, skip = 0, topics = []) => {
   const topicsParam = topics.length > 0 ? `&topics=${topics.join(",")}` : "";
   return api.get(
@@ -87,24 +109,17 @@ export const getPopularPublications = (limit = 10, skip = 0, topics = []) => {
   );
 };
 
-export const getRandomPublications = (count = 5, topics = []) => {
-  const topicsParam = topics.length > 0 ? `&topics=${topics.join(",")}` : "";
-  return api.get(`/publications/random?count=${count}${topicsParam}`);
-};
-
-export const getPublications = (skip = 0, limit = 10) =>
-  api.get(`/publications/?skip=${skip}&limit=${limit}`);
-
+// endpoint for searching publications
 export const searchPublications = (q, limit = 10) =>
   api.get(`/publications/search?q=${q}&limit=${limit}`);
 
-export const getPublication = (id) => api.get(`/publications/${id}`);
-
-// Bookmarks
+// endpoint for adding a bookmark to a publication
 export const addBookmark = (publication_id) =>
   api.post("/publications/bookmarks", { publication_id });
 
+// endpoint for getting bookmarks of a user
 export const getMyBookmarks = () => api.get("/publications/bookmarks/me");
 
+// endpoint for deleting a bookmark from a publication
 export const deleteBookmark = (publication_id) =>
   api.delete(`/publications/bookmarks/${publication_id}`);
