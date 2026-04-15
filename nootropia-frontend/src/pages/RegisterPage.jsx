@@ -107,7 +107,12 @@ function RegisterPage() {
               />
             </div>
 
-            <Button1 type="submit" textButton="Register" disabled={loading} />
+            <Button1
+              type="submit"
+              textButton="Register"
+              disabled={loading}
+              className="font-mono p-[15px] rounded-lg text-xl font-semibold text-purple-400 border-2 border-purple-400 hover:bg-purple-400 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </form>
         </div>
       </CentralBox>

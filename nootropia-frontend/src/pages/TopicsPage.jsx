@@ -183,6 +183,7 @@ function TopicsPage() {
               textButton={loading ? "Saving..." : "Continue →"}
               disabled={loading}
               onClick={handleContinue}
+              className="font-mono p-[15px] rounded-lg text-xl font-semibold text-purple-400 border-2 border-purple-400 hover:bg-purple-400 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <div className="flex flex-row items-center gap-4">
               {!user && (

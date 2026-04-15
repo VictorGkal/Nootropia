@@ -34,8 +34,16 @@ function LandingPage() {
         {hovered && (
           <FadeContent duration={500} easing="ease-out" initialOpacity={0}>
             <div className="flex flex-col justify-center gap-6">
-              <Button1 navigation="/register" textButton="Register"></Button1>
-              <Button1 navigation="/login" textButton="Log in"></Button1>
+              <Button1
+                navigation="/register"
+                textButton="Register"
+                className="font-mono p-[15px] rounded-lg text-xl font-semibold text-purple-400 border-2 border-purple-400 hover:bg-purple-400 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              ></Button1>
+              <Button1
+                navigation="/login"
+                textButton="Log in"
+                className="font-mono p-[15px] rounded-lg text-xl font-semibold text-purple-400 border-2 border-purple-400 hover:bg-purple-400 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              ></Button1>
               <Button1
                 navigation="/topics"
                 textButton="Continue as Guest"
