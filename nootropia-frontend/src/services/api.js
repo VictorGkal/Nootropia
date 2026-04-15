@@ -48,7 +48,8 @@ api.interceptors.response.use(
     // check if error is for token expiry and if the error occurs on refresh
     if (
       error.response?.status === 401 &&
-      error.config?.url !== "/users/refresh"
+      error.config?.url !== "/users/refresh" &&
+      error.config?.url !== "/users/login"
     ) {
       try {
         const res = await refresh(); // get a dictionary that contains the access token and the token type
