@@ -1,9 +1,10 @@
+// container component that shows all the available topics for selection or for clearing
 function TopicBox({
-  label,
-  buttonLabel,
-  buttonColor,
-  onButtonClick,
-  children,
+  label, // this label is showed over the container
+  buttonLabel, // button label (select all  or clear all)
+  buttonColor, // depends if the container is for selecting or clearing
+  onButtonClick, // handles logic for select all or clear all
+  children, // all the topis for selection or clearing
 }) {
   return (
     <div className="flex flex-col gap-2 flex-1">

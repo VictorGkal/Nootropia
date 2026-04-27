@@ -1,4 +1,4 @@
-// Used twice — available and selected topics
+// shows topic in a container with different styles if the topic is selected or not
 function TopicBadge({ topic, onClick, selected = false }) {
   return (
     <span

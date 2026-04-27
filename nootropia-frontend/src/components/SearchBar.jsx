@@ -1,3 +1,4 @@
+// search bar component used for searching topics, publicaitons in the pages
 function SearchBar({ value, onChange, placeholder }) {
   return (
     <input

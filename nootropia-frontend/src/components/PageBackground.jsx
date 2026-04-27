@@ -1,3 +1,4 @@
+// component for background styling in all pages
 function PageBackground({ children }) {
   return (
     <div

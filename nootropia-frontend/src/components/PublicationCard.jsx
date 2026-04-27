@@ -2,33 +2,39 @@ import { useState } from "react";
 import { addBookmark, deleteBookmark } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
+// component that displays a publication in a container
 function PublicationCard({
   publication,
-  isBookmarked = false,
-  onBookmarkChange,
+  isBookmarked = false, // flag for knowing if a publication is bookmarked
+  onBookmarkChange, // callback for when a publication gets bookmarked or not
 }) {
-  const { user } = useAuth();
-  const [bookmarked, setBookmarked] = useState(isBookmarked);
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
-  const [popKey, setPopKey] = useState(0);
+  const { user } = useAuth(); // for getting user
+  const [bookmarked, setBookmarked] = useState(isBookmarked); // for setting a publication bookmarked
+  const [bookmarkLoading, setBookmarkLoading] = useState(false); // for bookmark animation
+  const [popKey, setPopKey] = useState(0); // for restarting the bookmark animation
 
   const handleBookmark = async () => {
-    if (!user) return;
+    if (!user) return; // if there is no user show no bookmark
 
     try {
       setBookmarkLoading(true);
+      // if publication is already bookmarked then unbookmark it
       if (bookmarked) {
         await deleteBookmark(publication.id);
         setBookmarked(false);
+        // notify parent component that publication was unbookmarked
         if (onBookmarkChange) onBookmarkChange(publication.id, false);
       } else {
         await addBookmark(publication.id);
         setBookmarked(true);
+        // increment popKey so remount of bookmark svg can happen and the animation replays
         setPopKey((prev) => prev + 1);
+        // notify parent component that publication was bookmarked
         if (onBookmarkChange) onBookmarkChange(publication.id, true);
       }
     } catch (err) {
-      const detail = err.response?.data?.detail;
+      const detail = err.response?.data?.detail; // get details for error data
+      // if frontend is out of sync with backend, correct the local state
       if (detail === "Already bookmarked") setBookmarked(true);
       if (detail === "Bookmark not found") setBookmarked(false);
       console.error(err);
@@ -39,7 +45,7 @@ function PublicationCard({
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col gap-3 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-      {/* Topic badges */}
+      {/* On Top Left - Topic badges */}
       <div className="flex flex-wrap gap-2">
         {publication.topics && publication.topics.length > 0 ? (
           publication.topics.map((topic) => (
@@ -57,12 +63,12 @@ function PublicationCard({
         ) : null}
       </div>
 
-      {/* Title */}
+      {/* Under Topic Badges Left of The Container - Title */}
       <h2 className="text-white font-semibold text-lg leading-snug">
         {publication.title || "Untitled"}
       </h2>
 
-      {/* Authors + Year + Citations */}
+      {/* Under Title Left of the Container - Authors + Year + Citations */}
       <div className="flex flex-row flex-wrap gap-3 text-sm text-gray-400">
         {publication.authors && (
           <span>
@@ -78,7 +84,7 @@ function PublicationCard({
           <span>Citations: {publication.citations}</span>
         )}
       </div>
-
+      {/* Under Authors left of the Container - First Lines of the Publication*/}
       {publication.abstract && (
         <p className="text-gray-400 text-sm leading-relaxed">
           {publication.abstract.length > 400
@@ -87,7 +93,8 @@ function PublicationCard({
         </p>
       )}
 
-      {/* Bottom row — URL + Bookmark */}
+      {/* Under Abstraction Left of the Container — URL of the publication */}
+      {/* On the same row as the URL but on the right of the Row - Bookmark Button*/}
       <div className="flex flex-row items-center justify-between mt-2">
         {publication.url ? (
           <a
@@ -101,7 +108,7 @@ function PublicationCard({
         ) : (
           <span className="text-gray-600 text-sm">No link available</span>
         )}
-
+        {/*Show bookmark button only if there is a user*/}
         {user && (
           <button
             onClick={handleBookmark}
