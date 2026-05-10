@@ -5,6 +5,9 @@ nootropia-backend/**/__pycache__
 nootropia-backend/.env
 nootropia-backend/docker-compose.yml
 
+# Frontend
+nootropia-frontend/.env.production
+
 # General
 .DS_Store
-*.pyc
+*.pyc                                                                                                                           

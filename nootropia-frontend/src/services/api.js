@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// get backend url
-const API_URL = "http://localhost:8000";
+// get backend url depending on production or develpoment
+const API_URL = import.meta.env.VITE_API_URL;
 
 // create an axios client
 const api = axios.create({
