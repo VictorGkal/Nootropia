@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // get backend url depending on production or develpoment
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://nootropia-backend-production.up.railway.app";
 
 // create an axios client
 const api = axios.create({
