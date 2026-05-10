@@ -2,6 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.routers import users, publications
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+
 
 # reads all models and creates their tables in db if they dont exist yet
 Base.metadata.create_all(bind=engine)
@@ -16,7 +23,7 @@ app = FastAPI(
 # add cors configurations
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "nootropia-frontend-production.up.railway.app"], # allow communication with frontend 
+    allow_origins=origins, # allow communication with frontend 
     allow_credentials=True,  # allow cookies and auth headers
     allow_methods=["*"], # allow all HTTP methods
     allow_headers=["*"],  # allow all headers
