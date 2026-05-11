@@ -29,7 +29,10 @@ services:
       - redis
 
   frontend:
-    build: ./nootropia-frontend
+    build:
+      context: ./nootropia-frontend
+      args:
+        VITE_API_URL: http://localhost:8000
     container_name: nootropia-frontend
     ports:
       - "5173:5173"
